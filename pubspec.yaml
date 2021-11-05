@@ -35,6 +35,7 @@ dependencies:
   percent_indicator: ^3.0.1
   path_provider: ^2.0.5
   get: ^4.3.8
+  
  
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -42,6 +43,7 @@ dependencies:
   
 
 dev_dependencies:
+  
   flutter_test:
     sdk: flutter
 
@@ -51,6 +53,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^1.0.0
+  
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -90,7 +94,9 @@ flutter:
     - family: Damion
       fonts:
         - asset: assets/fonts/Damion-Regular.ttf
-   
+    - family: LibreBaskerville
+      fonts:
+        - asset: assets/fonts/LibreBaskerville-Regular.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

@@ -1,140 +1,107 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/widgets.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:pdf_text/pdf_text.dart';
+import 'package:get/get.dart';
 
 import 'package:rapid_reader_app/db/books_database.dart';
 import 'package:rapid_reader_app/model/book.dart';
+import 'package:rapid_reader_app/state/book_controller.dart';
 import 'package:rapid_reader_app/view/block_reading_view.dart';
 import 'package:rapid_reader_app/view/free_reading_view.dart';
 
-class LibraryPage extends StatefulWidget {
-  final route;
-  const LibraryPage({Key? key, this.route}) : super(key: key);
+class LibraryPage extends StatelessWidget {
+  LibraryPage({
+    Key? key,
+  }) : super(key: key);
+  final state = Get.find<BookController>();
 
-  @override
-  _LibraryPageState createState() => _LibraryPageState(this.route);
-}
-
-class _LibraryPageState extends State<LibraryPage> {
-  late List<Book> books;
-  bool isLoading = false;
-  String route = "free";
-  int totalIndex = 10000;
   int curIndex = 0;
-  bool _isEditingText = false;
-  late TextEditingController _editingController;
-  int menuVal = 0;
-  _LibraryPageState(this.route);
-  @override
-  void initState() {
-    super.initState();
-    refreshBooks();
-    _editingController = TextEditingController();
-  }
-
-  Future refreshBooks() async {
-    setState(() => isLoading = true);
-    books = await BooksDatabase.instance.getAllBooks();
-    setState(() => isLoading = false);
-  }
-
-  @override
-  void dispose() {
-    _editingController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        backgroundColor: const Color(0xFF121212),
-        appBar: AppBar(
-            actions: [
-              DropdownButtonHideUnderline(
-                child: DropdownButton(
-                  dropdownColor: Colors.black,
-                  iconEnabledColor: Colors.white,
-                  value: route,
-                  items: [
-                    DropdownMenuItem(
-                        child: Text("   Block Reading",
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontFamily: "BebasNeue",
-                                color: Colors.white)),
-                        value: "block"),
-                    DropdownMenuItem(
-                      child: Text("Shadow Reading",
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontFamily: "BebasNeue",
-                              color: Colors.white)),
-                      value: "free",
-                    )
-                  ],
-                  onChanged: (String? value) {
-                    setState(() {
-                      route = value ?? "";
-                    });
-                  },
+      child: Obx(() {
+        return Scaffold(
+          backgroundColor: const Color(0xFF121212),
+          appBar: AppBar(
+              actions: [
+                DropdownButtonHideUnderline(
+                  child: DropdownButton(
+                    dropdownColor: Colors.black,
+                    iconEnabledColor: Colors.white,
+                    value: state.route.value,
+                    items: [
+                      dropdownMenuItem(text: "Block Mode", value: "block"),
+                      dropdownMenuItem(text: "Shadow Mode", value: "shadow"),
+                      dropdownMenuItem(text: "Chasing Mode", value: "chasing"),
+                    ],
+                    onChanged: (String? value) {
+                      state.setRoute(value ?? "");
+                    },
+                  ),
                 ),
-              ),
-              IconButton(
-                  tooltip: "Add Book",
-                  onPressed: () {
-                    pickFile();
-                  },
-                  icon: const Icon(
-                    Icons.add_box_outlined,
-                    size: 30,
-                    color: Colors.orangeAccent,
-                  ))
-            ],
-            backgroundColor: Colors.white.withOpacity(0.2),
-            title: const Text("Library",
-                style: TextStyle(
-                    fontSize: 30,
-                    fontFamily: "BebasNeue",
-                    color: Colors.orangeAccent))),
-        body: Center(
-          child: isLoading
-              ? CircularProgressIndicator()
-              : books.isEmpty
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'No Books',
-                          style: TextStyle(
-                              color: Colors.orangeAccent,
-                              fontSize: 40,
-                              fontFamily: "BebasNeue"),
-                        ),
-                        Text(
-                            "You can upload a pdf file from the top right button",
+                IconButton(
+                    tooltip: "Add Book",
+                    onPressed: () {
+                      state.pickFile();
+                    },
+                    icon: const Icon(
+                      Icons.add_box_outlined,
+                      size: 30,
+                      color: Colors.orangeAccent,
+                    ))
+              ],
+              backgroundColor: Colors.white.withOpacity(0.2),
+              title: const Text("Library",
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontFamily: "BebasNeue",
+                      color: Colors.orangeAccent))),
+          body: Center(
+            child: state.areBooksLoading.value
+                ? CircularProgressIndicator()
+                : state.books.isEmpty
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'No Books',
                             style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontFamily: "BebasNeue"))
-                      ],
-                    )
-                  : buildBooks(),
-        ),
-      ),
+                                color: Colors.orangeAccent,
+                                fontSize: 40,
+                                fontFamily: "BebasNeue"),
+                          ),
+                          Text(
+                              "You can upload a pdf file from the top right button",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontFamily: "BebasNeue"))
+                        ],
+                      )
+                    : buildBooks(),
+          ),
+        );
+      }),
     );
+  }
+
+  DropdownMenuItem<String> dropdownMenuItem(
+      {required String text, required String value}) {
+    return DropdownMenuItem(
+        child: Text(text,
+            style: TextStyle(
+                fontSize: 20, fontFamily: "BebasNeue", color: Colors.white)),
+        value: value);
   }
 
   Widget buildBooks() {
     return ListView.builder(
-        itemCount: books.length,
+        itemCount: state.books.length,
         itemBuilder: (context, index) {
-          final book = books[index];
+          final book = state.books.elementAt(index);
           return Card(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
@@ -143,48 +110,44 @@ class _LibraryPageState extends State<LibraryPage> {
               shadowColor: Colors.blueGrey,
               color: Colors.white.withOpacity(0.1),
               child: ListTile(
-                onTap: () async {
-                  if (route == "free") {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => FreeReading(
-                                  indexInPage: book.indexInPage,
-                                  idBook: book.id!,
-                                  pageNo: book.pageNo,
-                                ))).then((value) => refreshBooks());
+                onTap: () {
+                  state.passData(book: book);
+                  if (state.route.value == "chasing" ||
+                      state.route.value == "shadow") {
+                    Get.to(() => FreeReading())!.then((value) {
+                      state.stopTimer();
+                      state.getBooks();
+                    });
                   } else {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => BlockReading(
-                                  indexInPage: book.indexInPage,
-                                  idBook: book.id!,
-                                  pageNo: book.pageNo,
-                                ))).then((value) => refreshBooks());
+                    Get.to(() => BlockReading())!.then((value) {
+                      state.stopTimer();
+                      state.getBooks();
+                    });
                   }
                 },
                 leading: CircularProgressIndicator(
                     backgroundColor: Colors.white.withOpacity(0.2),
                     color: Colors.orangeAccent,
                     value: (book.pageNo / book.totalPage)),
-                title: editableNameOfBook(book, index),
+                title: Obx(() {
+                  return editableNameOfBook(book, index);
+                }),
                 trailing: Wrap(
                   spacing: 0,
                   children: [
                     IconButton(
                         onPressed: () {
                           curIndex = index;
-                          setState(() {
-                            _isEditingText = true;
-                          });
+
+                          state.setIsEditing(true);
                         },
-                        icon: Icon(Icons.edit, color: Colors.purpleAccent)),
+                        icon: Icon(Icons.edit, color: Colors.white)),
                     IconButton(
-                      icon: Icon(Icons.delete, color: Colors.purpleAccent),
+                      icon: Icon(Icons.delete, color: Colors.white),
                       onPressed: () async {
+                        File(book.path).delete();
                         await BooksDatabase.instance.delete(book.id!);
-                        refreshBooks();
+                        state.getBooks();
                       },
                     ),
                   ],
@@ -193,60 +156,19 @@ class _LibraryPageState extends State<LibraryPage> {
         });
   }
 
-  List<String> stringParser(String text) {
-    List<String> tempList = text.trim().split(RegExp('\\s+'));
-    tempList.removeWhere((element) => element == '');
-    tempList.add("FINISHED!");
-    tempList.add("FINISHED!");
-    totalIndex = tempList.length;
-    return tempList;
-  }
-
-  Future pickFile() async {
-    String fileName;
-    int pageNo = 1;
-    int indexInPage = 0;
-
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-    );
-    if (result == null) return null;
-
-    var file = result.files.first;
-    fileName = file.name.replaceAll(".pdf", "");
-
-    final newFile = await saveFilePermanently(file);
-    String path = newFile.path;
-    BooksDatabase.instance.create(Book(
-      name: fileName,
-      indexInPage: indexInPage,
-      path: path,
-      pageNo: pageNo,
-      totalPage: 200,
-    ));
-    refreshBooks();
-  }
-
-  Future<File> saveFilePermanently(PlatformFile file) async {
-    final appStorage = await getApplicationDocumentsDirectory();
-    final newFile = File('${appStorage.path}/${file.name}');
-    return File(file.path!).copy(newFile.path);
-  }
-
   Widget editableNameOfBook(Book book, int index) {
-    if (_isEditingText && index == curIndex) {
+    if (state.isEditing.value && index == curIndex) {
       return TextField(
+        controller: state.changeName,
         style: TextStyle(color: Colors.white),
         onSubmitted: (newValue) async {
-          await BooksDatabase.instance.update(book.copy(name: newValue));
-          setState(() {
-            _isEditingText = false;
-            refreshBooks();
-          });
+          if (newValue != "" && newValue != " ") {
+            await BooksDatabase.instance.update(book.copy(name: newValue));
+            state.getBooks();
+          }
+          state.setIsEditing(false);
         },
         autofocus: true,
-        controller: _editingController,
       );
     }
     return Text(

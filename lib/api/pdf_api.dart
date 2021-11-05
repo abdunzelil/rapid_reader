@@ -1,7 +1,13 @@
 import 'dart:io';
+
 import 'package:pdf_text/pdf_text.dart';
 
 class PDFApi {
+  static int totalPage = 200;
+  static int getTotpage() {
+    return totalPage;
+  }
+
   static Future<List<String>> pdfToStr(File tempFile, int pageNo) async {
     PDFDoc doc = await PDFDoc.fromFile(tempFile);
     PDFPage page = doc.pageAt(pageNo);
@@ -9,10 +15,11 @@ class PDFApi {
     List<String> tempList = pageText.trim().split(RegExp('\\s+'));
     tempList.removeWhere((element) => element == '');
     if (tempList.isEmpty) {
-      tempList.add("BLANKPAGE");
+      tempList.add("BLANK");
+      tempList.add("PAGE");
     }
     if (pageNo == 1) {
-      tempList.add("${doc.length}");
+      totalPage = doc.length;
     }
 
     return tempList;

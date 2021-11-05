@@ -1,238 +1,106 @@
-import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:rapid_reader_app/api/pdf_api.dart';
+import 'package:get/get.dart';
 
-import 'package:rapid_reader_app/db/books_database.dart';
-import 'package:rapid_reader_app/model/book.dart';
+import 'package:rapid_reader_app/components/button.dart';
+import 'package:rapid_reader_app/components/change_page.dart';
+import 'package:rapid_reader_app/components/font_edit.dart';
+import 'package:rapid_reader_app/components/slider.dart';
 
-class BlockReading extends StatefulWidget {
-  final int indexInPage;
-  final int idBook;
-  final int pageNo;
+import 'package:rapid_reader_app/state/book_controller.dart';
 
-  const BlockReading({
-    Key? key,
-    required this.indexInPage,
-    required this.idBook,
-    required this.pageNo,
-  }) : super(key: key);
+class BlockReading extends StatelessWidget {
+  final state = Get.find<BookController>();
 
-  @override
-  _BlockReadingState createState() => _BlockReadingState(
-        indexInPage,
-        idBook,
-        pageNo,
-      );
-}
-
-class _BlockReadingState extends State<BlockReading>
-    with WidgetsBindingObserver {
-  late Book book;
-  bool isLoading = false;
-  int indexWordSlider = 0;
-  int indexSpeedSlider = 0;
-
-  int pageNo = 0;
-  int wordDeger = 1;
-  int speedDeger = 120;
-  int idBook;
-
-  int totalPage = 200;
-  late List<String> listOfWord;
-
-  int index = 0;
-
-  Timer? timer;
-  _BlockReadingState(
-    this.index,
-    this.idBook,
-    this.pageNo,
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance!.addObserver(this);
-    refreshBook();
-  }
-
-  Future refreshBook() async {
-    setState(() => isLoading = true);
-
-    book = await BooksDatabase.instance.getBook(idBook);
-    listOfWord = await PDFApi.pdfToStr(File(book.path), book.pageNo);
-    if (pageNo == 1) {
-      totalPage = int.parse(listOfWord[listOfWord.length - 1]);
-      listOfWord.removeAt(listOfWord.length - 1);
-      await BooksDatabase.instance.update(book.copy(totalPage: totalPage));
-      book = await BooksDatabase.instance.getBook(idBook);
-    }
-    setState(() => isLoading = false);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // TODO: implement didChangeAppLifecycleState
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      if (timer!.isActive == true) {
-        stopTimer(prev: false);
-      }
-    }
-  }
+  BlockReading({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-          backgroundColor: const Color(0xFF121212),
-          body: isLoading
-              ? Center(child: CircularProgressIndicator())
-              : blockBody()),
-    );
-  }
-
-  void startTimer() {
-    timer = Timer.periodic(
-        Duration(milliseconds: miliSecondCalculator(wordDeger, speedDeger)),
-        (_) {
-      setState(() {
-        if (indexWordSlider == 0) {
-          if (index <= (listOfWord.length - 2)) {
-            index++;
-          } else {
-            if (pageNo < book.totalPage) {
-              pageNo++;
-
-              changeList();
-              index = 0;
-            } else {
-              stopTimer(prev: false);
-            }
-          }
-        } else {
-          if (index <= (listOfWord.length - 4)) {
-            index = index + 2;
-          } else if (index <= (listOfWord.length - 3)) {
-            listOfWord.add(" ");
-            index = index + 2;
-          } else {
-            if (pageNo < book.totalPage) {
-              pageNo++;
-              changeList();
-              index = 0;
-            } else {
-              stopTimer(prev: false);
-            }
-          }
-        }
-      });
-    });
-  }
-
-  Widget blockBody() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
-      child:
-          Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                const Text(" Words Per Minute",
-                    style: TextStyle(
-                        color: Colors.orangeAccent,
-                        fontFamily: "BebasNeue",
-                        fontSize: 20)),
-                buildSpeedSlider(),
-              ],
-            ),
-            Column(
-              children: [
-                const Text("Num of Words display",
-                    style: TextStyle(
-                        color: Colors.orangeAccent,
-                        fontFamily: "BebasNeue",
-                        fontSize: 20)),
-                buildWordSlider(),
-              ],
-            ),
-          ],
-        ),
-        Center(
-          child: Container(
-            child: Text(
-                (indexWordSlider == 0)
-                    ? listOfWord[index]
-                    : listOfWord[index] + " " + listOfWord[index + 1],
-                style: const TextStyle(
-                    color: Colors.white, fontSize: 30, fontFamily: "Roboto")),
-          ),
-        ),
-        buildButton(),
-      ]),
-    );
-  }
-
-  void changeList() async {
-    setState(() => isLoading = true);
-    listOfWord = await PDFApi.pdfToStr(File(book.path), pageNo);
-
-    setState(() => isLoading = false);
-  }
-
-  void prevWord() {
-    if (index > 0) {
-      setState(() {
-        index--;
-      });
-    }
-  }
-
-  void stopTimer({
-    bool prev = true,
-  }) {
-    if (prev) {
-      prevWord();
-      return;
-    }
-
-    setState(() => timer?.cancel());
+        child: Scaffold(
+            backgroundColor: const Color(0xFF121212),
+            body: Obx(() {
+              return state.isLoading.value
+                  ? Center(child: CircularProgressIndicator())
+                  : Padding(
+                      padding:
+                          const EdgeInsets.only(left: 10, right: 10, top: 20),
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  children: [
+                                    const Text(" Words Per Minute",
+                                        style: TextStyle(
+                                            color: Colors.orangeAccent,
+                                            fontFamily: "BebasNeue",
+                                            fontSize: 20)),
+                                    CustomSlider(
+                                        form: "speed",
+                                        thumb: Colors.purpleAccent,
+                                        active: Colors.purpleAccent
+                                            .withOpacity(0.7),
+                                        inactive: Colors.purpleAccent
+                                            .withOpacity(0.5)),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    const Text("Num of Words display",
+                                        style: TextStyle(
+                                            color: Colors.orangeAccent,
+                                            fontFamily: "BebasNeue",
+                                            fontSize: 20)),
+                                    RotatedBox(
+                                        quarterTurns: 1,
+                                        child: CustomSlider(
+                                            active: Colors.purpleAccent
+                                                .withOpacity(0.7),
+                                            form: "word",
+                                            inactive: Colors.purpleAccent
+                                                .withOpacity(0.5),
+                                            thumb: Colors.purpleAccent)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Center(
+                              child: Container(
+                                child: Text(state.blockStr.value,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize:
+                                            state.fontSize.value.toDouble(),
+                                        fontFamily: "LibreBaskerville")),
+                              ),
+                            ),
+                            buildButton(),
+                          ]),
+                    );
+            })));
   }
 
   Widget buildButton() {
-    final isRunning = timer == null ? false : timer!.isActive;
-    final isStarting = (pageNo == 1 && index == 0);
-    if (pageNo == book.totalPage &&
-        ((indexWordSlider == 0 && index == listOfWord.length - 1) ||
-            (indexWordSlider == 1 && index == listOfWord.length - 2))) {
-      return OutlinedButton(
-          style: OutlinedButton.styleFrom(
-              primary: Colors.orangeAccent.withOpacity(0.7),
-              side: BorderSide(
-                  color: Colors.orangeAccent.withOpacity(0.7), width: 3)),
-          onPressed: () async {
-            await BooksDatabase.instance
-                .update(book.copy(indexInPage: index, pageNo: pageNo));
-            Navigator.pop(context);
+    final isRunning = state.isTimerRunning.value;
+    final isStarting = (state.pageNo == 1 && state.index == 0);
+    if (state.pageNo == state.totalPage.value &&
+        ((state.indexWordSlider.value == 0 &&
+                state.index == state.listOfWord.length - 1) ||
+            (state.indexWordSlider.value == 1 &&
+                state.index == state.listOfWord.length - 2))) {
+      return ButtonView(
+          fontSize: 25,
+          butColor: Colors.orangeAccent,
+          func: () {
+            state.updateBook(
+                indexInPage: state.index,
+                pageNo: state.pageNo,
+                totalPage: state.totalPage.value);
+            Get.back();
           },
-          child: Text(
-            "BACK",
-            style: TextStyle(
-                color: Colors.orangeAccent,
-                fontSize: 25,
-                fontFamily: "BebasNeue"),
-          ));
+          text: "BACK");
     } else {
       return isRunning || !isStarting
           ? Column(
@@ -240,71 +108,49 @@ class _BlockReadingState extends State<BlockReading>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                            primary: Colors.orangeAccent.withOpacity(0.7),
-                            side: BorderSide(
-                                color: Colors.orangeAccent.withOpacity(0.7),
-                                width: 3)),
-                        onPressed: () {
-                          if (isRunning) {
-                            stopTimer(prev: false);
-                          } else {
-                            startTimer();
-                          }
-                        },
-                        child: Text(
-                          isRunning ? 'Pause' : 'Resume',
-                          style: TextStyle(
-                              fontSize: 25,
-                              color: Colors.orangeAccent.withOpacity(0.7),
-                              fontFamily: "BebasNeue"),
-                        )),
+                    ButtonView(
+                        fontSize: 25,
+                        butColor: Colors.orangeAccent,
+                        func: (isRunning) ? state.stopTimer : state.startTimer,
+                        text: isRunning ? 'Pause' : 'Resume'),
                     SizedBox(
                       width: 15,
                     ),
-                    OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                            primary: Colors.orange,
-                            side: BorderSide(
-                                color: Colors.orangeAccent.withOpacity(0.7),
-                                width: 3)),
-                        onPressed: () {
-                          stopTimer();
-                        },
-                        child: Text("Previous Word",
-                            style: TextStyle(
-                                fontSize: 25,
-                                color: Colors.orangeAccent.withOpacity(0.7),
-                                fontFamily: "BebasNeue")))
+                    ButtonView(
+                        fontSize: 25,
+                        butColor: Colors.orangeAccent,
+                        func: state.prevWord,
+                        text: "Previous"),
                   ],
                 ),
                 !isRunning
                     ? Column(
                         children: [
-                          OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                  primary: Colors.orangeAccent,
-                                  side: BorderSide(
-                                      color:
-                                          Colors.orangeAccent.withOpacity(0.7),
-                                      width: 3)),
-                              onPressed: () async {
-                                await BooksDatabase.instance.update(book.copy(
-                                    indexInPage: index, pageNo: pageNo));
+                          ButtonView(
+                              fontSize: 25,
+                              butColor: Colors.orangeAccent,
+                              func: () {
+                                state.updateBook(
+                                    indexInPage: state.index,
+                                    pageNo: state.pageNo,
+                                    totalPage: state.totalPage.value);
                               },
-                              child: Text("Save Progress",
-                                  style: TextStyle(
-                                      fontSize: 25,
-                                      color:
-                                          Colors.orangeAccent.withOpacity(0.7),
-                                      fontFamily: "BebasNeue"))),
+                              text: "Save Progress"),
                           SizedBox(
-                            height: 5,
+                            height: 10,
                           ),
-                          Text("$pageNo / ${book.totalPage}",
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: "BebasNeue"))
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ModifyPage(
+                                  val:
+                                      "${state.pageNo} / ${state.totalPage.value}"),
+                              SizedBox(
+                                width: 60,
+                              ),
+                              FontChanger(val: state.fontSize.value.toString())
+                            ],
+                          )
                         ],
                       )
                     : SizedBox(
@@ -316,108 +162,18 @@ class _BlockReadingState extends State<BlockReading>
                     minHeight: 5,
                     color: Colors.orangeAccent,
                     backgroundColor: Colors.white.withOpacity(0.2),
-                    value: (book.pageNo / book.totalPage),
+                    value: (state.pageNo / state.totalPage.value),
                   ),
                 )
               ],
             )
           : Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                    primary: Colors.orangeAccent,
-                    side:
-                        const BorderSide(color: Colors.orangeAccent, width: 3)),
-                child: const Text(
-                  "START",
-                  style: TextStyle(
-                      color: Colors.orangeAccent,
-                      fontSize: 25,
-                      fontFamily: "BebasNeue"),
-                ),
-                onPressed: () {
-                  startTimer();
-                },
-              ),
-            );
+              child: ButtonView(
+                  fontSize: 25,
+                  butColor: Colors.orangeAccent,
+                  func: state.startTimer,
+                  text: "START"));
     }
-  }
-
-  Widget buildSpeedSlider() {
-    final labels = [
-      '120',
-      '150',
-      '180',
-      '210',
-      '240',
-      '270',
-      '300',
-      '330',
-      '360',
-      '390',
-      '420',
-      '450',
-      '480',
-      '510',
-      '540',
-      '570',
-      '600'
-    ];
-    final double min = 0;
-    final isRunning = timer == null ? false : timer!.isActive;
-    final double max = labels.length - 1.0;
-    final divisions = labels.length - 1;
-    speedDeger = indexSpeedSlider * 30 + 120;
-    return Slider(
-        value: indexSpeedSlider.toDouble(),
-        thumbColor: Colors.purpleAccent,
-        activeColor: Colors.orangeAccent.withOpacity(0.3),
-        inactiveColor: Colors.purpleAccent.withOpacity(0.5),
-        max: max,
-        min: min,
-        divisions: divisions,
-        label: '$speedDeger',
-        onChanged: (value) {
-          if (!isRunning) {
-            setState(() => this.indexSpeedSlider = value.toInt());
-          } else {
-            null;
-          }
-        });
-  }
-
-  Widget buildWordSlider() {
-    final labels = ['1', '2'];
-    final double min = 0;
-    wordDeger = indexWordSlider + 1;
-    final double max = labels.length - 1.0;
-    final divisions = labels.length - 1;
-    return RotatedBox(
-      quarterTurns: 1,
-      child: Container(
-        width: 80,
-        child: Slider(
-            thumbColor: Colors.purpleAccent,
-            inactiveColor: Colors.purpleAccent.withOpacity(0.5),
-            activeColor: Colors.orangeAccent.withOpacity(0.3),
-            value: indexWordSlider.toDouble(),
-            max: max,
-            min: min,
-            divisions: divisions,
-            label: '$wordDeger',
-            onChanged: (value) =>
-                setState(() => this.indexWordSlider = value.toInt())),
-      ),
-    );
-  }
-
-  int miliSecondCalculator(int wordDeger, int speedDeger) {
-    int miliSecon = 200;
-    if (wordDeger == 1) {
-      miliSecon = (60000 / speedDeger).round();
-    } else if (wordDeger == 2) {
-      miliSecon = (60000 / speedDeger * 2).round();
-    }
-    return miliSecon;
   }
 }
