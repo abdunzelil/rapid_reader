@@ -7,6 +7,7 @@ import 'package:rapid_reader_app/components/font_edit.dart';
 import 'package:rapid_reader_app/components/slider.dart';
 
 import 'package:rapid_reader_app/state/book_controller.dart';
+import 'package:rapid_reader_app/view/ad_view.dart';
 
 class BlockReading extends StatelessWidget {
   final state = Get.find<BookController>();
@@ -27,45 +28,7 @@ class BlockReading extends StatelessWidget {
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  children: [
-                                    const Text(" Words Per Minute",
-                                        style: TextStyle(
-                                            color: Colors.orangeAccent,
-                                            fontFamily: "BebasNeue",
-                                            fontSize: 20)),
-                                    CustomSlider(
-                                        form: "speed",
-                                        thumb: Colors.purpleAccent,
-                                        active: Colors.purpleAccent
-                                            .withOpacity(0.7),
-                                        inactive: Colors.purpleAccent
-                                            .withOpacity(0.5)),
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    const Text("Num of Words display",
-                                        style: TextStyle(
-                                            color: Colors.orangeAccent,
-                                            fontFamily: "BebasNeue",
-                                            fontSize: 20)),
-                                    RotatedBox(
-                                        quarterTurns: 1,
-                                        child: CustomSlider(
-                                            active: Colors.purpleAccent
-                                                .withOpacity(0.7),
-                                            form: "word",
-                                            inactive: Colors.purpleAccent
-                                                .withOpacity(0.5),
-                                            thumb: Colors.purpleAccent)),
-                                  ],
-                                ),
-                              ],
-                            ),
+                            sliderWidget(),
                             Center(
                               child: Container(
                                 child: Text(state.blockStr.value,
@@ -80,6 +43,44 @@ class BlockReading extends StatelessWidget {
                           ]),
                     );
             })));
+  }
+
+  Row sliderWidget() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          children: [
+            const Text(" Words Per Minute",
+                style: TextStyle(
+                    color: Colors.orangeAccent,
+                    fontFamily: "BebasNeue",
+                    fontSize: 20)),
+            CustomSlider(
+                form: "speed",
+                thumb: Colors.purpleAccent,
+                active: Colors.purpleAccent.withOpacity(0.7),
+                inactive: Colors.purpleAccent.withOpacity(0.5)),
+          ],
+        ),
+        Column(
+          children: [
+            const Text("Num of Words display",
+                style: TextStyle(
+                    color: Colors.orangeAccent,
+                    fontFamily: "BebasNeue",
+                    fontSize: 20)),
+            RotatedBox(
+                quarterTurns: 1,
+                child: CustomSlider(
+                    active: Colors.purpleAccent.withOpacity(0.7),
+                    form: "word",
+                    inactive: Colors.purpleAccent.withOpacity(0.5),
+                    thumb: Colors.purpleAccent)),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget buildButton() {

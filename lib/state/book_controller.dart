@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:rapid_reader_app/api/pdf_api.dart';
 import 'package:rapid_reader_app/db/books_database.dart';
 import 'package:rapid_reader_app/model/book.dart';
+import 'package:rapid_reader_app/view/ad_view.dart';
 
 class BookController extends SuperController {
   RxString route = "".obs;
@@ -28,6 +29,7 @@ class BookController extends SuperController {
   RxString thirdFree = "".obs;
   RxString secFree = "".obs;
   RxString fourthFree = "".obs;
+  late InterAdd interAdd;
 
   RxInt fontSize = 28.obs;
 
@@ -56,6 +58,7 @@ class BookController extends SuperController {
       BooksDatabase.instance.update(book.copy(totalPage: totalPage.value));
       getBooks();
     }
+    interAdd = InterAdd();
     isLoading.value = false;
   }
 
@@ -201,20 +204,32 @@ class BookController extends SuperController {
   }
 
   void changeList(bool oto) async {
-    if (oto == true) {
-      timer!.cancel();
+    if (pageNo % 5 == 4) {
+      interAdd.showInterstitialAd();
+      if (oto == true) {
+        stopTimer();
+      }
       isLoading.value = true;
 
       listOfWord = await PDFApi.pdfToStr(File(book.path), pageNo);
       refreshText();
       isLoading.value = false;
-      startTimer();
     } else {
-      isLoading.value = true;
+      if (oto == true) {
+        timer!.cancel();
+        isLoading.value = true;
 
-      listOfWord = await PDFApi.pdfToStr(File(book.path), pageNo);
-      refreshText();
-      isLoading.value = false;
+        listOfWord = await PDFApi.pdfToStr(File(book.path), pageNo);
+        refreshText();
+        isLoading.value = false;
+        startTimer();
+      } else {
+        isLoading.value = true;
+
+        listOfWord = await PDFApi.pdfToStr(File(book.path), pageNo);
+        refreshText();
+        isLoading.value = false;
+      }
     }
   }
 

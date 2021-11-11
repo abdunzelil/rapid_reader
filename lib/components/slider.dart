@@ -62,6 +62,7 @@ class CustomSlider extends StatelessWidget {
             });
       });
     } else {
+      final isRunning = state.isTimerRunning.value;
       final labels = ['1', '2'];
       final double min = 0;
       final double max = labels.length - 1.0;
@@ -78,7 +79,13 @@ class CustomSlider extends StatelessWidget {
               min: min,
               divisions: divisions,
               label: '${state.wordDeger.value}',
-              onChanged: (value) => state.setIndexWord(value.toInt())),
+              onChanged: (value) {
+                if (!isRunning) {
+                  state.setIndexWord(value.toInt());
+                } else {
+                  null;
+                }
+              }),
         );
       });
     }
