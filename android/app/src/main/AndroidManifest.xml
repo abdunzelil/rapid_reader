@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.rapid_reader_app">
+    package="com.boss.rapid_reader_app">
    <application
         android:label="Rapid Reader"
         android:icon="@mipmap/ic_launcher">
