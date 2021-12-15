@@ -7,7 +7,7 @@ class AdHelper {
     } else if (Platform.isIOS) {
       return "";
     } else {
-      throw new UnsupportedError("Unsupported platform");
+      throw UnsupportedError("Unsupported platform");
     }
   }
 
@@ -17,7 +17,7 @@ class AdHelper {
     } else if (Platform.isIOS) {
       return "";
     } else {
-      throw new UnsupportedError("Unsupported platform");
+      throw UnsupportedError("Unsupported platform");
     }
   }
 }
