@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rapid_reader_app/core/theme/custom_text_theme.dart';
+import 'package:rapid_reader_app/core/theme/palette.dart';
+import 'package:rapid_reader_app/data/enums/modify_page_num.dart';
 import 'package:rapid_reader_app/state/book_controller.dart';
 
 class ModifyPage extends StatelessWidget {
@@ -13,28 +16,27 @@ class ModifyPage extends StatelessWidget {
       IconButton(
           iconSize: 20,
           padding: EdgeInsets.zero,
-          constraints: BoxConstraints(),
+          constraints: const BoxConstraints(),
           onPressed: () {
-            state.modifyPagenum("back");
+            state.modifyPagenum(ModifyPageNum.back);
           },
           icon: Icon(
             Icons.arrow_back_ios,
-            color: Colors.white,
+            color: Palette.label,
           )),
       Padding(
-        padding: const EdgeInsets.only(right: 3),
-        child: Text(val,
-            style: TextStyle(
-                color: Colors.white, fontSize: 15, fontFamily: "BebasNeue")),
-      ),
+          padding: const EdgeInsets.only(right: 3),
+          child: Text(val,
+              style:
+                  CustomTextTheme(context).bodyText1.copyWith(fontSize: 15))),
       IconButton(
           iconSize: 20,
           padding: EdgeInsets.zero,
-          constraints: BoxConstraints(),
+          constraints: const BoxConstraints(),
           onPressed: () {
-            state.modifyPagenum("next");
+            state.modifyPagenum(ModifyPageNum.next);
           },
-          icon: Icon(Icons.arrow_forward_ios, color: Colors.white)),
+          icon: Icon(Icons.arrow_forward_ios, color: Palette.label)),
     ]);
   }
 }

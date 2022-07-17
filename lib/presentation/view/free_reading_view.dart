@@ -1,13 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:rapid_reader_app/core/extensions/size_extension.dart';
+import 'package:rapid_reader_app/core/theme/palette.dart';
+import 'package:rapid_reader_app/localization/app_localization.dart';
 
-import 'package:rapid_reader_app/components/button.dart';
-import 'package:rapid_reader_app/components/change_page.dart';
-import 'package:rapid_reader_app/components/slider.dart';
+import 'package:rapid_reader_app/presentation/components/components.dart';
 
 import 'package:rapid_reader_app/state/book_controller.dart';
 
@@ -22,53 +19,53 @@ class FreeReading extends StatelessWidget {
         (state.route.value == "chasing") ? Colors.white : Colors.black;
 
     final containerColor = (state.route.value == "chasing")
-        ? Color(0xff032a3b).withOpacity(0.8)
+        ? const Color(0xff032a3b).withOpacity(0.8)
         : Colors.black.withOpacity(0.8);
     return SafeArea(child: Obx(() {
       return Scaffold(
-          backgroundColor:
-              (state.route == "shadow") ? Color(0xFFe5cda7) : Color(0xFF121212),
+          backgroundColor: (state.route.value == "shadow")
+              ? const Color(0xFFe5cda7)
+              : Palette.backgroundColor,
           body: state.isLoading.value
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : Stack(children: [
                   GestureDetector(
                     onTap: () => state.changeIsVisible(),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
                       child: Container(
-                          padding: EdgeInsets.only(
-                              left: 10, right: 10, top: 10, bottom: 10),
+                          padding: const EdgeInsets.all(10),
                           child: RichText(
                             text: TextSpan(children: [
                               textSpanner(textColor.withOpacity(0.1),
                                   state.firstFree.value),
                               (state.route.value == "shadow")
-                                  ? (state.wordDeger == 2)
+                                  ? (state.wordDeger.value == 2)
                                       ? TextSpan(children: [
                                           widgetSpanner(
                                               state.secFree.value + " ",
-                                              BorderRadius.only(
+                                              const BorderRadius.only(
                                                   topLeft: Radius.circular(10),
                                                   bottomLeft:
                                                       Radius.circular(10))),
                                           widgetSpanner(
                                               state.thirdFree.value,
-                                              BorderRadius.only(
+                                              const BorderRadius.only(
                                                   topRight: Radius.circular(10),
                                                   bottomRight:
                                                       Radius.circular(10))),
                                         ])
                                       : widgetSpanner(state.secFree.value,
                                           BorderRadius.circular(10))
-                                  : (state.wordDeger == 2)
+                                  : (state.wordDeger.value == 2)
                                       ? textSpanner(
-                                          Colors.white,
+                                          Palette.label,
                                           state.secFree.value +
                                               " " +
                                               state.thirdFree.value,
                                         )
                                       : textSpanner(
-                                          Colors.white, state.secFree.value),
+                                          Palette.label, state.secFree.value),
                               textSpanner(textColor.withOpacity(0.1),
                                   state.fourthFree.value)
                             ]),
@@ -76,13 +73,13 @@ class FreeReading extends StatelessWidget {
                     ),
                   ),
                   Align(
-                      alignment: Alignment(0, 0.9),
-                      child: buildSettingContainer(containerColor)),
+                      alignment: const Alignment(0, 0.9),
+                      child: buildSettingContainer(containerColor, context)),
                 ]));
     }));
   }
 
-  Widget buildSettingContainer(Color containerColor) {
+  Widget buildSettingContainer(Color containerColor, BuildContext context) {
     return Visibility(
         visible: state.isContVisible.value,
         child: Container(
@@ -90,13 +87,13 @@ class FreeReading extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             color: containerColor,
           ),
-          width: 350,
-          height: 250,
-          child: Center(child: buildButton()),
+          width: 350.sp,
+          height: 250.sp,
+          child: Center(child: buildButton(context)),
         ));
   }
 
-  Widget buildButton() {
+  Widget buildButton(BuildContext context) {
     final isRunning = state.isTimerRunning.value;
     final isStarting = (state.pageNo == 1 && state.index == 0);
     if (state.pageNo == state.totalPage.value &&
@@ -104,9 +101,7 @@ class FreeReading extends StatelessWidget {
                 state.index == state.listOfWord.length - 1) ||
             (state.indexWordSlider.value == 1 &&
                 state.index == state.listOfWord.length - 2))) {
-      return ButtonView(
-          fontSize: 25,
-          butColor: Colors.orangeAccent,
+      return CustomButton(
           func: () {
             state.updateBook(
                 indexInPage: state.index,
@@ -123,36 +118,35 @@ class FreeReading extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ButtonView(
-                        butColor: Colors.orangeAccent,
+                    CustomButton(
                         func: (isRunning) ? state.stopTimer : state.startTimer,
-                        text: isRunning ? 'Pause' : 'Resume',
+                        text: isRunning
+                            ? context.translate("PAUSE")
+                            : context.translate("RESUME"),
                         fontSize: 15),
                     SizedBox(
-                      width: 15,
+                      width: 15.sp,
                     ),
-                    ButtonView(
-                        butColor: Colors.orangeAccent,
+                    CustomButton(
                         func: state.prevWord,
-                        text: "Previous",
+                        text: context.translate("PREVIOUS"),
                         fontSize: 15),
                   ],
                 ),
                 !isRunning
                     ? Column(
                         children: [
-                          ButtonView(
-                              butColor: Colors.orangeAccent,
+                          CustomButton(
                               func: () {
                                 state.updateBook(
                                     indexInPage: state.index,
                                     pageNo: state.pageNo,
                                     totalPage: state.totalPage.value);
                               },
-                              text: "Save Progress",
+                              text: context.translate("SAVE_PROGRESS"),
                               fontSize: 15),
                           SizedBox(
-                            height: 5,
+                            height: 5.sp,
                           ),
                           Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -164,14 +158,14 @@ class FreeReading extends StatelessWidget {
                         ],
                       )
                     : SizedBox(
-                        height: 5,
+                        height: 5.sp,
                       ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 20.0, vertical: 10),
                   child: LinearProgressIndicator(
-                    minHeight: 5,
-                    color: Colors.orangeAccent,
+                    minHeight: 5.sp,
+                    color: Palette.primaryColor,
                     backgroundColor: Colors.white.withOpacity(0.2),
                     value: (state.pageNo / state.totalPage.value),
                   ),
@@ -183,14 +177,14 @@ class FreeReading extends StatelessWidget {
                       children: [
                         CustomSlider(
                             form: "speed",
-                            thumb: Colors.purpleAccent,
-                            active: Colors.purpleAccent.withOpacity(0.7),
-                            inactive: Colors.purpleAccent.withOpacity(0.5)),
+                            thumb: Palette.secondaryColor,
+                            active: Palette.secondaryColor.withOpacity(0.7),
+                            inactive: Palette.secondaryColor.withOpacity(0.5)),
                         Text(
-                          "Words per Min",
+                          context.translate("WORDS_PER_MINUTE"),
                           style: TextStyle(
                               fontSize: 15,
-                              color: Colors.orangeAccent,
+                              color: Palette.primaryColor,
                               fontFamily: "BebasNeue"),
                         )
                       ],
@@ -199,12 +193,12 @@ class FreeReading extends StatelessWidget {
                       children: [
                         CustomSlider(
                             form: "word",
-                            thumb: Colors.purpleAccent,
-                            active: Colors.purpleAccent.withOpacity(0.7),
-                            inactive: Colors.purpleAccent.withOpacity(0.5)),
-                        Text("Num of Words display",
+                            thumb: Palette.secondaryColor,
+                            active: Palette.secondaryColor.withOpacity(0.7),
+                            inactive: Palette.secondaryColor.withOpacity(0.5)),
+                        Text(context.translate("NUM_OF_WORDS"),
                             style: TextStyle(
-                                color: Colors.orangeAccent,
+                                color: Palette.primaryColor,
                                 fontFamily: "BebasNeue",
                                 fontSize: 15)),
                       ],
@@ -214,12 +208,10 @@ class FreeReading extends StatelessWidget {
               ],
             )
           : Container(
-              padding: EdgeInsets.all(70),
-              child: ButtonView(
-                butColor: Colors.orangeAccent,
-                fontSize: 25,
+              padding: const EdgeInsets.all(70),
+              child: CustomButton(
                 func: state.startTimer,
-                text: "START",
+                text: context.translate("START"),
               ),
             );
     }
@@ -242,7 +234,7 @@ class FreeReading extends StatelessWidget {
             BoxDecoration(color: Colors.black, borderRadius: borderRadius),
         child: Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
               fontSize: 19,
               color: Colors.white,
               fontWeight: FontWeight.normal,

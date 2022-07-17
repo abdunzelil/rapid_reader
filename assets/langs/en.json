@@ -1,0 +1,21 @@
+{
+    "NUM_OF_WORDS": "Num of Words display",
+    "READ_AN_ENTIRE_BOOK": "Read an entire book in a day!",
+    "WORDS_PER_MINUTE": "Words Per Minute",
+    "PAUSE": "Pause",
+    "BACK": "BACK",
+    "RESUME": "Resume",
+    "PREVIOUS": "Previous",
+    "SAVE_PROGRESS": "Save Progress",
+    "START": "START",
+    "BLOCK_MODE": "BLOCK MODE",
+    "SHADOW_MODE": "SHADOW MODE",
+    "CHASING_MODE": "CHASING MODE",
+    "DELETE": "Delete",
+    "LIBRARY": "Library",
+    "ADD_BOOK": "Add Book",
+    "DESC": "●This app was created to enable you to carry out your readings with a deeper focus, thus increasing your comprehension rate and allowing you to finish your books in a shorter time.\n ●The books you want to read must be in pdf format.\n ●You cannot read pdf files whose text consists of images. If \"Blank Page\" is written on the screen while reading, it means that there is no text on that page.",
+    "GENERAL_INFO": "GENERAL INFORMATION",
+    "NO_BOOKS": "No Books",
+    "YOU_CAN_UPLOAD": "You can upload a pdf file from the top right button"
+}

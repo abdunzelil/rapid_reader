@@ -1,0 +1,1 @@
+enum SetFontSize { up, down }

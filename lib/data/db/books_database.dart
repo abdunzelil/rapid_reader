@@ -1,4 +1,4 @@
-import 'package:rapid_reader_app/model/book.dart';
+import 'package:rapid_reader_app/data/model/book.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 

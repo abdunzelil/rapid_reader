@@ -3,10 +3,13 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rapid_reader_app/api/pdf_api.dart';
-import 'package:rapid_reader_app/db/books_database.dart';
-import 'package:rapid_reader_app/model/book.dart';
-import 'package:rapid_reader_app/view/ad_view.dart';
+import 'package:rapid_reader_app/data/enums/modify_page_num.dart';
+import 'package:rapid_reader_app/data/enums/set_font_size.dart';
+import 'package:rapid_reader_app/service/pdf_service.dart';
+import 'package:rapid_reader_app/data/db/books_database.dart';
+import 'package:rapid_reader_app/data/model/book.dart';
+import 'package:rapid_reader_app/presentation/view/views.dart';
+import 'package:rapid_reader_app/helper/mili_second_calculator.dart';
 
 class BookController extends SuperController {
   RxString route = "".obs;
@@ -23,6 +26,7 @@ class BookController extends SuperController {
   RxString blockStr = "".obs;
   RxInt wordDeger = 1.obs;
   RxInt speedDeger = 120.obs;
+  RxInt curIndex = 0.obs;
   RxString bookName = "".obs;
   RxString firstFree = "".obs;
   RxString thirdFree = "".obs;
@@ -46,14 +50,14 @@ class BookController extends SuperController {
     pageNo = book.pageNo;
     index = book.indexInPage;
     totalPage.value = book.totalPage;
-    listOfWord = await PDFApi.pdfToStr(File(book.path), pageNo);
+    listOfWord = await PDFService.pdfToStr(File(book.path), pageNo);
     if (route.value == "block") {
       blockStr.value = updateBlockString();
     } else {
       updateFreeStr();
     }
     if (pageNo == 1 && index == 0) {
-      totalPage.value = PDFApi.getTotpage();
+      totalPage.value = PDFService.getTotpage();
       BooksDatabase.instance.update(book.copy(totalPage: totalPage.value));
       getBooks();
     }
@@ -67,8 +71,8 @@ class BookController extends SuperController {
     super.onInit();
   }
 
-  void modifyPagenum(String x) {
-    if (x == "next") {
+  void modifyPagenum(ModifyPageNum x) {
+    if (x == ModifyPageNum.next) {
       if (pageNo < totalPage.value) {
         index = 0;
         pageNo++;
@@ -83,8 +87,8 @@ class BookController extends SuperController {
     }
   }
 
-  void setFontSize(String x) {
-    if (x == "up") {
+  void setFontSize(SetFontSize x) {
+    if (x == SetFontSize.up) {
       fontSize.value++;
     } else {
       fontSize.value--;
@@ -132,6 +136,9 @@ class BookController extends SuperController {
     this.speedDeger.value = speedDeger;
   }
 
+  void setCurIndex(int curIndex) {
+    this.curIndex.value = curIndex;
+  }
   void setIsTimerRunning(bool isRunning) {
     isTimerRunning.value = isRunning;
   }
@@ -210,7 +217,7 @@ class BookController extends SuperController {
       }
       isLoading.value = true;
 
-      listOfWord = await PDFApi.pdfToStr(File(book.path), pageNo);
+      listOfWord = await PDFService.pdfToStr(File(book.path), pageNo);
       refreshText();
       isLoading.value = false;
     } else {
@@ -218,14 +225,14 @@ class BookController extends SuperController {
         timer!.cancel();
         isLoading.value = true;
 
-        listOfWord = await PDFApi.pdfToStr(File(book.path), pageNo);
+        listOfWord = await PDFService.pdfToStr(File(book.path), pageNo);
         refreshText();
         isLoading.value = false;
         startTimer();
       } else {
         isLoading.value = true;
 
-        listOfWord = await PDFApi.pdfToStr(File(book.path), pageNo);
+        listOfWord = await PDFService.pdfToStr(File(book.path), pageNo);
         refreshText();
         isLoading.value = false;
       }
@@ -233,7 +240,10 @@ class BookController extends SuperController {
   }
 
   void stopTimer() {
-    timer!.cancel();
+    if (timer != null) {
+      timer!.cancel();
+    }
+    
     isTimerRunning.value = false;
   }
 
@@ -245,15 +255,7 @@ class BookController extends SuperController {
     refreshText();
   }
 
-  int miliSecondCalculator(int wordDeger, int speedDeger) {
-    int miliSecon = 200;
-    if (wordDeger == 1) {
-      miliSecon = (60000 / speedDeger).round();
-    } else if (wordDeger == 2) {
-      miliSecon = (60000 / speedDeger * 2).round();
-    }
-    return miliSecon;
-  }
+  
 
   void updateFreeStr() {
     firstFree.value = listOfWord.sublist(0, index).join(" ") + " ";
@@ -275,7 +277,6 @@ class BookController extends SuperController {
     String fileName;
     int pageNo = 1;
     int indexInPage = 0;
-    int totalPage = 200;
 
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -300,25 +301,23 @@ class BookController extends SuperController {
 
   @override
   void onDetached() {
-    // TODO: implement onDetached
   }
 
   @override
   void onInactive() {
-    if (timer!.isActive == true) {
+    if ((timer?.isActive ?? false) == true) {
       stopTimer();
     }
   }
 
   @override
   void onPaused() {
-    if (timer!.isActive == true) {
+    if ((timer?.isActive ?? false) == true) {
       stopTimer();
     }
   }
 
   @override
   void onResumed() {
-    // TODO: implement onResumed
   }
 }

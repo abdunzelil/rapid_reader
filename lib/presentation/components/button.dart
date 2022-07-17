@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:rapid_reader_app/core/theme/palette.dart';
 
-class ButtonView extends StatelessWidget {
-  final Color butColor;
+class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback func;
   final int fontSize;
-  const ButtonView(
-      {Key? key,
-      required this.butColor,
-      required this.func,
-      required this.text,
-      required this.fontSize})
+  const CustomButton(
+      {Key? key, required this.func, required this.text, this.fontSize = 25})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
         style: OutlinedButton.styleFrom(
-            primary: butColor, side: BorderSide(color: butColor, width: 3)),
+            primary: Palette.primaryColor,
+            side: BorderSide(color: Palette.primaryColor, width: 3)),
         onPressed: func,
         child: Text(text,
             style: TextStyle(
                 fontSize: fontSize.toDouble(),
-                color: butColor,
+                color: Palette.primaryColor,
                 fontFamily: "BebasNeue")));
   }
 }

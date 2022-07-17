@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:pdf_text/pdf_text.dart';
 
-class PDFApi {
+class PDFService {
   static int totalPage = 200;
   static int getTotpage() {
     return totalPage;

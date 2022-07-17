@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rapid_reader_app/core/extensions/size_extension.dart';
 import 'package:rapid_reader_app/state/book_controller.dart';
 
 class CustomSlider extends StatelessWidget {
@@ -38,7 +39,7 @@ class CustomSlider extends StatelessWidget {
         '570',
         '600'
       ];
-      final double min = 0;
+      const double min = 0;
       final isRunning = state.isTimerRunning.value;
       final double max = labels.length - 1.0;
       final divisions = labels.length - 1;
@@ -64,12 +65,12 @@ class CustomSlider extends StatelessWidget {
     } else {
       final isRunning = state.isTimerRunning.value;
       final labels = ['1', '2'];
-      final double min = 0;
+      const double min = 0;
       final double max = labels.length - 1.0;
       final divisions = labels.length - 1;
       return Obx(() {
-        return Container(
-          width: 80,
+        return SizedBox(
+          width: 80.sp,
           child: Slider(
               thumbColor: thumb,
               inactiveColor: inactive,

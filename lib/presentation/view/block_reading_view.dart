@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rapid_reader_app/core/extensions/size_extension.dart';
+import 'package:rapid_reader_app/localization/app_localization.dart';
 
-import 'package:rapid_reader_app/components/button.dart';
-import 'package:rapid_reader_app/components/change_page.dart';
-import 'package:rapid_reader_app/components/font_edit.dart';
-import 'package:rapid_reader_app/components/slider.dart';
+import 'package:rapid_reader_app/presentation/components/components.dart';
 
 import 'package:rapid_reader_app/state/book_controller.dart';
-import 'package:rapid_reader_app/view/ad_view.dart';
+
+import '../../core/theme/palette.dart';
 
 class BlockReading extends StatelessWidget {
   final state = Get.find<BookController>();
@@ -18,72 +18,69 @@ class BlockReading extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-            backgroundColor: const Color(0xFF121212),
+            backgroundColor: Palette.backgroundColor,
             body: Obx(() {
               return state.isLoading.value
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : Padding(
                       padding:
                           const EdgeInsets.only(left: 10, right: 10, top: 20),
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            sliderWidget(),
+                            sliderWidget(context),
                             Center(
-                              child: Container(
-                                child: Text(state.blockStr.value,
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize:
-                                            state.fontSize.value.toDouble(),
-                                        fontFamily: "LibreBaskerville")),
-                              ),
+                              child: Text(state.blockStr.value,
+                                  style: TextStyle(
+                                      color: Palette.label,
+                                      fontSize: state.fontSize.value.toDouble(),
+                                      fontFamily: "LibreBaskerville")),
                             ),
-                            buildButton(),
+                            buildButton(context),
                           ]),
                     );
             })));
   }
 
-  Row sliderWidget() {
+  Row sliderWidget(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Column(
           children: [
-            const Text(" Words Per Minute",
+            Text(context.translate("WORDS_PER_MINUTE"),
                 style: TextStyle(
-                    color: Colors.orangeAccent,
+                    color: Palette.primaryColor,
                     fontFamily: "BebasNeue",
-                    fontSize: 20)),
+                    fontSize: 18)),
             CustomSlider(
                 form: "speed",
-                thumb: Colors.purpleAccent,
-                active: Colors.purpleAccent.withOpacity(0.7),
-                inactive: Colors.purpleAccent.withOpacity(0.5)),
+                thumb: Palette.secondaryColor,
+                active: Palette.secondaryColor.withOpacity(0.7),
+                inactive: Palette.secondaryColor.withOpacity(0.5)),
           ],
         ),
         Column(
           children: [
-            const Text("Num of Words display",
+            Text(context.translate("NUM_OF_WORDS"),
                 style: TextStyle(
-                    color: Colors.orangeAccent,
+                    color: Palette.primaryColor,
                     fontFamily: "BebasNeue",
-                    fontSize: 20)),
+                    fontSize: 18)),
             RotatedBox(
                 quarterTurns: 1,
                 child: CustomSlider(
-                    active: Colors.purpleAccent.withOpacity(0.7),
+                    active: Palette.secondaryColor.withOpacity(0.7),
                     form: "word",
-                    inactive: Colors.purpleAccent.withOpacity(0.5),
-                    thumb: Colors.purpleAccent)),
+                    inactive: Palette.secondaryColor.withOpacity(0.5),
+                    thumb: Palette.secondaryColor)),
           ],
         ),
       ],
     );
   }
 
-  Widget buildButton() {
+  Widget buildButton(BuildContext context) {
     final isRunning = state.isTimerRunning.value;
     final isStarting = (state.pageNo == 1 && state.index == 0);
     if (state.pageNo == state.totalPage.value &&
@@ -91,9 +88,7 @@ class BlockReading extends StatelessWidget {
                 state.index == state.listOfWord.length - 1) ||
             (state.indexWordSlider.value == 1 &&
                 state.index == state.listOfWord.length - 2))) {
-      return ButtonView(
-          fontSize: 25,
-          butColor: Colors.orangeAccent,
+      return CustomButton(
           func: () {
             state.updateBook(
                 indexInPage: state.index,
@@ -109,36 +104,32 @@ class BlockReading extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ButtonView(
-                        fontSize: 25,
-                        butColor: Colors.orangeAccent,
+                    CustomButton(
                         func: (isRunning) ? state.stopTimer : state.startTimer,
-                        text: isRunning ? 'Pause' : 'Resume'),
+                        text: isRunning
+                            ? context.translate("PAUSE")
+                            : context.translate("RESUME")),
                     SizedBox(
-                      width: 15,
+                      width: 15.sp,
                     ),
-                    ButtonView(
-                        fontSize: 25,
-                        butColor: Colors.orangeAccent,
+                    CustomButton(
                         func: state.prevWord,
-                        text: "Previous"),
+                        text: context.translate("PREVIOUS")),
                   ],
                 ),
                 !isRunning
                     ? Column(
                         children: [
-                          ButtonView(
-                              fontSize: 25,
-                              butColor: Colors.orangeAccent,
+                          CustomButton(
                               func: () {
                                 state.updateBook(
                                     indexInPage: state.index,
                                     pageNo: state.pageNo,
                                     totalPage: state.totalPage.value);
                               },
-                              text: "Save Progress"),
+                              text: context.translate("SAVE_PROGRESS")),
                           SizedBox(
-                            height: 10,
+                            height: 10.sp,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -147,7 +138,7 @@ class BlockReading extends StatelessWidget {
                                   val:
                                       "${state.pageNo} / ${state.totalPage.value}"),
                               SizedBox(
-                                width: 60,
+                                width: 60.sp,
                               ),
                               FontChanger(val: state.fontSize.value.toString())
                             ],
@@ -155,14 +146,14 @@ class BlockReading extends StatelessWidget {
                         ],
                       )
                     : SizedBox(
-                        height: 20,
+                        height: 20.sp,
                       ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: LinearProgressIndicator(
-                    minHeight: 5,
-                    color: Colors.orangeAccent,
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    minHeight: 5.sp,
+                    color: Palette.primaryColor,
+                    backgroundColor: Palette.label.withOpacity(0.2),
                     value: (state.pageNo / state.totalPage.value),
                   ),
                 )
@@ -170,11 +161,8 @@ class BlockReading extends StatelessWidget {
             )
           : Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
-              child: ButtonView(
-                  fontSize: 25,
-                  butColor: Colors.orangeAccent,
-                  func: state.startTimer,
-                  text: "START"));
+              child: CustomButton(
+                  func: state.startTimer, text: context.translate("START")));
     }
   }
 }

@@ -1,0 +1,1 @@
+enum ModifyPageNum { next, back }

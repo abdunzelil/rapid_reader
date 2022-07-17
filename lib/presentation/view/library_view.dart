@@ -1,14 +1,16 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
-import 'package:rapid_reader_app/db/books_database.dart';
-import 'package:rapid_reader_app/model/book.dart';
+import 'package:rapid_reader_app/data/db/books_database.dart';
+import 'package:rapid_reader_app/data/model/book.dart';
+import 'package:rapid_reader_app/localization/app_localization.dart';
 import 'package:rapid_reader_app/state/book_controller.dart';
-import 'package:rapid_reader_app/view/block_reading_view.dart';
-import 'package:rapid_reader_app/view/free_reading_view.dart';
+
+import 'package:rapid_reader_app/presentation/view/views.dart';
+
+import '../../core/theme/palette.dart';
 
 class LibraryPage extends StatelessWidget {
   LibraryPage({
@@ -16,25 +18,29 @@ class LibraryPage extends StatelessWidget {
   }) : super(key: key);
   final state = Get.find<BookController>();
 
-  int curIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Obx(() {
         return Scaffold(
-          backgroundColor: const Color(0xFF121212),
+          backgroundColor: Palette.backgroundColor,
           appBar: AppBar(
               actions: [
                 DropdownButtonHideUnderline(
                   child: DropdownButton(
                     dropdownColor: Colors.black,
-                    iconEnabledColor: Colors.white,
+                    iconEnabledColor: Palette.label,
                     value: state.route.value,
                     items: [
-                      dropdownMenuItem(text: "Block Mode", value: "block"),
-                      dropdownMenuItem(text: "Shadow Mode", value: "shadow"),
-                      dropdownMenuItem(text: "Chasing Mode", value: "chasing"),
+                      dropdownMenuItem(
+                          text: context.translate("BLOCK_MODE"),
+                          value: "block"),
+                      dropdownMenuItem(
+                          text: context.translate("SHADOW_MODE"),
+                          value: "shadow"),
+                      dropdownMenuItem(
+                          text: context.translate("CHASING_MODE"),
+                          value: "chasing"),
                     ],
                     onChanged: (String? value) {
                       state.setRoute(value ?? "");
@@ -42,41 +48,37 @@ class LibraryPage extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                    tooltip: "Add Book",
+                    tooltip: context.translate("ADD_BOOK"),
                     onPressed: () {
                       state.pickFile();
                     },
-                    icon: const Icon(
-                      Icons.add_box_outlined,
-                      size: 30,
-                      color: Colors.orangeAccent,
-                    ))
+                    icon: Icon(Icons.add_box_outlined,
+                        size: 30, color: Palette.primaryColor))
               ],
-              backgroundColor: Colors.white.withOpacity(0.2),
-              title: const Text("Library",
+              backgroundColor: Palette.label.withOpacity(0.2),
+              title: Text(context.translate("LIBRARY"),
                   style: TextStyle(
                       fontSize: 30,
                       fontFamily: "BebasNeue",
-                      color: Colors.orangeAccent))),
+                      color: Palette.primaryColor))),
           body: Center(
             child: state.areBooksLoading.value
-                ? CircularProgressIndicator()
+                ? const CircularProgressIndicator()
                 : state.books.isEmpty
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Text(
-                            'No Books',
+                          Text(
+                            context.translate("NO_BOOKS"),
                             style: TextStyle(
-                                color: Colors.orangeAccent,
+                                color: Palette.primaryColor,
                                 fontSize: 40,
                                 fontFamily: "BebasNeue"),
                           ),
-                          Text(
-                              "You can upload a pdf file from the top right button",
+                          Text(context.translate("YOU_CAN_UPLOAD"),
                               style: TextStyle(
-                                  color: Colors.white,
+                                  color: Palette.label,
                                   fontSize: 20,
                                   fontFamily: "BebasNeue"))
                         ],
@@ -93,7 +95,7 @@ class LibraryPage extends StatelessWidget {
     return DropdownMenuItem(
         child: Text(text,
             style: TextStyle(
-                fontSize: 20, fontFamily: "BebasNeue", color: Colors.white)),
+                fontSize: 20, fontFamily: "BebasNeue", color: Palette.label)),
         value: value);
   }
 
@@ -105,10 +107,10 @@ class LibraryPage extends StatelessWidget {
           return Card(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
-                  side:
-                      BorderSide(color: Colors.purpleAccent.withOpacity(0.8))),
+                  side: BorderSide(
+                      color: Palette.secondaryColor.withOpacity(0.8))),
               shadowColor: Colors.blueGrey,
-              color: Colors.white.withOpacity(0.1),
+              color: Palette.label.withOpacity(0.1),
               child: ListTile(
                 onTap: () {
                   state.passData(book: book);
@@ -126,8 +128,8 @@ class LibraryPage extends StatelessWidget {
                   }
                 },
                 leading: CircularProgressIndicator(
-                    backgroundColor: Colors.white.withOpacity(0.2),
-                    color: Colors.orangeAccent,
+                    backgroundColor: Palette.label.withOpacity(0.2),
+                    color: Palette.primaryColor,
                     value: (book.pageNo / book.totalPage)),
                 title: Obx(() {
                   return editableNameOfBook(book, index);
@@ -137,13 +139,12 @@ class LibraryPage extends StatelessWidget {
                   children: [
                     IconButton(
                         onPressed: () {
-                          curIndex = index;
-
+                          state.setCurIndex(index);
                           state.setIsEditing(true);
                         },
-                        icon: Icon(Icons.edit, color: Colors.white)),
+                        icon: Icon(Icons.edit, color: Palette.label)),
                     IconButton(
-                      icon: Icon(Icons.delete, color: Colors.white),
+                      icon: Icon(Icons.delete, color: Palette.label),
                       onPressed: () async {
                         File(book.path).delete();
                         await BooksDatabase.instance.delete(book.id!);
@@ -157,23 +158,24 @@ class LibraryPage extends StatelessWidget {
   }
 
   Widget editableNameOfBook(Book book, int index) {
-    if (state.isEditing.value && index == curIndex) {
+    if (state.isEditing.value && index == state.curIndex.value) {
       return TextField(
         controller: state.changeName,
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: Palette.label),
         onSubmitted: (newValue) async {
           if (newValue != "" && newValue != " ") {
             await BooksDatabase.instance.update(book.copy(name: newValue));
             state.getBooks();
           }
           state.setIsEditing(false);
+          state.changeName.text = "";
         },
         autofocus: true,
       );
     }
     return Text(
       book.name,
-      style: TextStyle(color: Colors.white),
+      style: TextStyle(color: Palette.label),
     );
   }
 }

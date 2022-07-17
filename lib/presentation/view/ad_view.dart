@@ -1,5 +1,5 @@
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:rapid_reader_app/api/ad_helper.dart';
+import 'package:rapid_reader_app/core/config/config.dart';
 
 class InterAdd {
   InterstitialAd? _interstitialAd;
@@ -12,8 +12,8 @@ class InterAdd {
 
   void _createInterstitialAd() {
     InterstitialAd.load(
-      adUnitId: AdHelper.interstitialAdUnitId,
-      request: AdRequest(),
+      adUnitId: Config.interstitialAdUnitId,
+      request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (InterstitialAd ad) {
           _interstitialAd = ad;

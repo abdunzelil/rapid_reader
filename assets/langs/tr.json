@@ -1,0 +1,21 @@
+{
+    "NUM_OF_WORDS": "Gösterilen kelime sayısı",
+    "READ_AN_ENTIRE_BOOK": "En uzun kitaplarını bir günde bitir!",
+    "WORDS_PER_MINUTE": "Dakikada Kelime Sayısı",
+    "PAUSE": "Durdur",
+    "BACK": "GERİ",
+    "RESUME": "Sürdür",
+    "PREVIOUS": "Önceki",
+    "SAVE_PROGRESS": "İlerlemeyi Kaydet",
+    "START": "BAŞLA",
+    "BLOCK_MODE": "BLOK MODU",
+    "SHADOW_MODE": "GÖLGE MODU",
+    "CHASING_MODE": "TAKİP MODU",
+    "DELETE": "Sil",
+    "LIBRARY": "Kütüphane",
+    "ADD_BOOK": "Kitap Ekle",
+    "DESC": "●Bu uygulama, okumalarınızı daha derin bir odaklanma ile gerçekleştirmenizi, böylece anlama oranınızı artırmanızı ve kitaplarınızı daha kısa sürede bitirmenizi sağlamak için oluşturulmuştur.\n ●Okumak istediğiniz kitaplar pdf formatında olmalıdır.\n ●Metni resimlerden oluşan pdf dosyalarını okuyamazsınız. Okurken ekranda \"Blank Page\" yazıyorsa o sayfada yazı yok demektir.",
+    "GENERAL_INFO": "GENEL BİLGİLENDİRME",
+    "NO_BOOKS": "Kitap Yok",
+    "YOU_CAN_UPLOAD": "Sağ üst butona tıklayarak kitap ekleyebilirsin"
+}
