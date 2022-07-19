@@ -1,7 +1,7 @@
 # RAPID READER
 
-Mobile application that allows you to read books with the effective methods and practice speed reading.
-I built this project for flutter learning purpose. I started on the 2nd day of the journey and finished it in 2 months.
+Mobile application that allows you to read books with effective methods and practice speed reading.
+I built this project for Flutter learning purpose. I started it on the 2nd day of the journey and finished it in 2 months.
 
 ## Views
 <a href="url"><img src="https://user-images.githubusercontent.com/79804837/179395415-71b9a886-7b94-4609-b64b-326f7bbfd702.jpg" align="left" height="355" width="200" ></a>
